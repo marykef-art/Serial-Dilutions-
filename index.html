@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serial Dilution — Sodium Oleate</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --hot:    #C2185B;
+    --rose:   #E91E8C;
+    --blush:  #FCE4EC;
+    --petal:  #F8BBD9;
+    --mauve:  #AD1457;
+    --gold:   #C8971A;
+    --goldl:  #FFF8E1;
+    --purple: #7B1FA2;
+    --lila:   #CE93D8;
+    --teal0:  #004D60;
+    --teal1:  #006980;
+    --teal2:  #2196A8;
+    --teal3:  #64B5C0;
+    --bg:     #FFF5FA;
+    --dim:    #8D6473;
+    --ink:    #1C0A14;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', Arial, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── CONFETTI BG ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(233,30,140,0.06) 0%, transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(123,31,162,0.06) 0%, transparent 40%),
+      radial-gradient(circle at 50% 80%, rgba(200,151,26,0.05) 0%, transparent 40%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+
+  /* ── FLOATING SPARKLES ── */
+  .sparkle-field {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .sp {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    animation: float-sp 8s infinite ease-in-out;
+    opacity: 0;
+  }
+  @keyframes float-sp {
+    0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--hot);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .header p {
+    color: var(--dim);
+    font-size: 0.95rem;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .pill {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--hot), var(--rose));
+    color: white;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  /* ── STEP CONTROLS ── */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .step-btn {
+    background: white;
+    border: 2px solid var(--petal);
+    color: var(--hot);
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .step-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--hot), var(--rose));
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .step-btn span { position: relative; z-index: 1; }
+  .step-btn:hover, .step-btn.active {
+    color: white;
+    border-color: var(--hot);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(194,24,91,0.30);
+  }
+  .step-btn:hover::before, .step-btn.active::before { opacity: 1; }
+
+  .play-btn {
+    background: linear-gradient(135deg, var(--gold), #E8B800);
+    border: none;
+    color: white;
+    padding: 10px 28px;
+    border-radius: 50px;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 4px 14px rgba(200,151,26,0.35);
+  }
+  .play-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(200,151,26,0.45);
+  }
+
+  /* ── LAB BENCH ── */
+  .lab-bench {
+    position: relative;
+    background: linear-gradient(180deg, #FFF0F6 0%, #FFE4EF 100%);
+    border-radius: 24px;
+    border: 2px solid var(--petal);
+    padding: 30px 20px 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 32px rgba(194,24,91,0.08);
+    overflow: hidden;
+  }
+  .lab-bench::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 14px;
+    background: linear-gradient(90deg,
+      var(--petal) 0%, var(--lila) 25%,
+      var(--petal) 50%, var(--lila) 75%, var(--petal) 100%);
+    border-radius: 0 0 22px 22px;
+    opacity: 0.5;
+  }
+
+  /* ── FLASK SVG CONTAINER ── */
+  .flasks-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0;
+    padding-bottom: 18px;
+  }
+
+  .flask-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    max-width: 200px;
+  }
+
+  /* ── SVG FLASK ── */
+  .flask-svg {
+    width: 120px;
+    height: 210px;
+    filter: drop-shadow(0 6px 16px rgba(194,24,91,0.15));
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .flask-svg:hover { transform: translateY(-6px) scale(1.04); }
+  .flask-svg.active-flask { transform: translateY(-8px) scale(1.06); }
+  .flask-svg.pulse {
+    animation: flask-pulse 0.6s ease;
+  }
+  @keyframes flask-pulse {
+    0%   { filter: drop-shadow(0 6px 16px rgba(194,24,91,0.15)); }
+    50%  { filter: drop-shadow(0 0 28px rgba(194,24,91,0.70)) drop-shadow(0 0 12px rgba(233,30,140,0.5)); }
+    100% { filter: drop-shadow(0 6px 16px rgba(194,24,91,0.15)); }
+  }
+
+  .flask-label {
+    margin-top: 12px;
+    text-align: center;
+  }
+  .flask-label .conc {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--hot);
+    display: block;
+  }
+  .flask-label .soln {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--purple);
+    display: block;
+    margin-top: 2px;
+  }
+  .flask-label .note {
+    font-size: 0.75rem;
+    color: var(--dim);
+    font-style: italic;
+    display: block;
+  }
+
+  /* ── PIPETTE ANIMATION ZONE ── */
+  .pip-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 120px;
+    position: relative;
+    padding-bottom: 16px;
+  }
+  .pip-svg {
+    width: 48px;
+    height: 180px;
+    opacity: 0.25;
+    transition: opacity 0.5s, transform 0.5s;
+    transform: translateY(0px);
+  }
+  .pip-svg.active-pip {
+    opacity: 1;
+    animation: pip-dip 1.4s ease-in-out;
+  }
+  @keyframes pip-dip {
+    0%   { transform: translateY(0); }
+    40%  { transform: translateY(30px); }
+    70%  { transform: translateY(30px); }
+    100% { transform: translateY(0); }
+  }
+  .pip-badge {
+    background: white;
+    border: 2px solid var(--hot);
+    color: var(--hot);
+    font-weight: 800;
+    font-size: 0.75rem;
+    border-radius: 12px;
+    padding: 3px 9px;
+    margin-top: 6px;
+    white-space: nowrap;
+    opacity: 0.3;
+    transition: opacity 0.5s;
+  }
+  .pip-badge.active-badge { opacity: 1; }
+
+  /* ── LIQUID DROP ANIMATION ── */
+  .drop {
+    position: absolute;
+    width: 10px; height: 14px;
+    border-radius: 50% 50% 60% 60%;
+    top: 60%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .drop.falling {
+    animation: drop-fall 0.9s cubic-bezier(0.55,0,1,0.45) forwards;
+  }
+  @keyframes drop-fall {
+    0%   { top: 60%; opacity: 1; transform: translateX(-50%) scale(1); }
+    80%  { top: 105%; opacity: 0.8; transform: translateX(-50%) scale(0.7); }
+    100% { top: 115%; opacity: 0; transform: translateX(-50%) scale(0.2); }
+  }
+
+  /* ── STEP INFO CARD ── */
+  .step-card {
+    background: white;
+    border-radius: 18px;
+    border: 2px solid var(--petal);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(194,24,91,0.07);
+    transition: all 0.3s;
+    display: none;
+  }
+  .step-card.visible { display: block; }
+  .step-card h3 {
+    color: var(--hot);
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step-num-badge {
+    background: linear-gradient(135deg, var(--hot), var(--rose));
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .step-card p { color: var(--ink); font-size: 0.92rem; line-height: 1.65; }
+  .step-card .eq {
+    background: var(--blush);
+    border-left: 4px solid var(--hot);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--hot);
+    font-weight: 700;
+  }
+  .highlight { color: var(--hot); font-weight: 800; }
+  .h-gold { color: var(--gold); font-weight: 800; }
+  .h-purple { color: var(--purple); font-weight: 800; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    height: 6px;
+    background: var(--petal);
+    border-radius: 3px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--hot), var(--rose));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── CONCENTRATION METER ── */
+  .conc-meter {
+    background: white;
+    border: 2px solid var(--petal);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(194,24,91,0.06);
+  }
+  .conc-meter h4 {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--purple);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .meter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    opacity: 0.3;
+    transition: opacity 0.4s;
+  }
+  .meter-row.lit { opacity: 1; }
+  .meter-row.active { opacity: 1; }
+  .meter-label {
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: var(--ink);
+    width: 100px;
+    flex-shrink: 0;
+  }
+  .meter-bar-bg {
+    flex: 1;
+    height: 14px;
+    background: #F5E6EE;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .meter-bar-fill {
+    height: 100%;
+    border-radius: 7px;
+    transition: width 0.6s ease;
+    width: 0;
+  }
+  .meter-value {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--hot);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── HEARTS ── */
+  .hearts-container {
+    position: fixed;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .heart-pop {
+    position: absolute;
+    font-size: 1.2rem;
+    animation: heart-rise 1.2s ease-out forwards;
+    opacity: 0;
+  }
+  @keyframes heart-rise {
+    0%   { opacity: 1; transform: translateY(0) scale(0.5); }
+    60%  { opacity: 0.8; transform: translateY(-60px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating sparkles -->
+<div class="sparkle-field" id="sparkles"></div>
+<div class="hearts-container" id="hearts"></div>
+
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="pill">✦ CHF 440 · Practical 3</div>
+    <h1>Serial Dilution of Sodium Oleate</h1>
+    <p>Step through each stage of the preparation — click a step or press Play</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="step-btn active" onclick="goStep(0)" id="btn0"><span>⚖ Step 1 — Prepare Stock</span></button>
+    <button class="step-btn" onclick="goStep(1)" id="btn1"><span>🧪 Step 2 — 1:10 Dilution</span></button>
+    <button class="step-btn" onclick="goStep(2)" id="btn2"><span>🧪 Step 3 — 1:10 Dilution</span></button>
+    <button class="step-btn" onclick="goStep(3)" id="btn3"><span>🧪 Step 4 — 1:10 Dilution</span></button>
+    <button class="play-btn" onclick="playAll()" id="playBtn"><span>▶ Play All Steps</span></button>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:25%"></div>
+  </div>
+
+  <!-- Lab bench with flasks -->
+  <div class="lab-bench">
+    <div class="flasks-row">
+
+      <!-- Flask A -->
+      <div class="flask-unit" id="unit0">
+        <svg class="flask-svg" id="flask0" viewBox="0 0 120 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="liqA" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#003D4D"/>
+              <stop offset="100%" stop-color="#006980"/>
+            </linearGradient>
+            <linearGradient id="glassA" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#E8F8FF" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#B2DFEE" stop-opacity="0.2"/>
+            </linearGradient>
+            <clipPath id="bulbClipA">
+              <ellipse cx="60" cy="148" rx="50" ry="50"/>
+            </clipPath>
+          </defs>
+          <!-- liquid fill -->
+          <rect x="11" y="118" width="98" height="80" fill="url(#liqA)" clip-path="url(#bulbClipA)" opacity="0.85"/>
+          <rect x="51" y="72" width="18" height="50" fill="#004D60" opacity="0.70"/>
+          <!-- glass bulb -->
+          <ellipse cx="60" cy="148" rx="50" ry="50" fill="url(#glassA)" stroke="#90CAF9" stroke-width="1.8"/>
+          <!-- shoulder -->
+          <path d="M 110 148 Q 112 98 69 80 L 51 80 Q 8 98 10 148" fill="none" stroke="#90CAF9" stroke-width="1.8"/>
+          <!-- neck -->
+          <rect x="51" y="14" width="18" height="68" fill="#E8F8FF" fill-opacity="0.20" stroke="#90CAF9" stroke-width="1.5"/>
+          <!-- calibration mark -->
+          <line x1="43" y1="106" x2="77" y2="106" stroke="#C2185B" stroke-width="1.5"/>
+          <!-- highlight -->
+          <path d="M 30 125 Q 25 148 35 170" stroke="white" stroke-width="3.5" fill="none" opacity="0.38" stroke-linecap="round"/>
+          <ellipse cx="35" cy="130" rx="9" ry="6" fill="white" opacity="0.22"/>
+          <!-- neck highlight -->
+          <line x1="55" y1="20" x2="55" y2="78" stroke="white" stroke-width="1.2" opacity="0.38"/>
+          <!-- stopper -->
+          <circle cx="60" cy="10" r="9" fill="#E0E0E0" stroke="#BDBDBD" stroke-width="1"/>
+          <ellipse cx="57" cy="7" rx="4" ry="2.5" fill="white" opacity="0.4"/>
+          <!-- 100 mL label -->
+          <text x="60" y="156" text-anchor="middle" font-family="Arial" font-size="9" fill="white" font-style="italic" opacity="0.85">100 mL</text>
+        </svg>
+        <div class="flask-label">
+          <span class="conc">0.01 M</span>
+          <span class="soln">Solution A</span>
+          <span class="note">(Stock)</span>
+        </div>
+      </div>
+
+      <!-- Pipette zone 1 -->
+      <div class="pip-zone" id="pip0">
+        <svg class="pip-svg" id="pipSvg0" viewBox="0 0 48 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pipLiq0" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#006980" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#2196A8" stop-opacity="0.4"/>
+            </linearGradient>
+          </defs>
+          <!-- body -->
+          <rect x="18" y="10" width="12" height="130" fill="#E8F8FF" fill-opacity="0.25" stroke="#90CAF9" stroke-width="1.2"/>
+          <!-- liquid -->
+          <rect x="19.5" y="12" width="9" height="100" fill="url(#pipLiq0)"/>
+          <!-- tip -->
+          <polygon points="18,140 30,140 24,170" fill="#E8F8FF" fill-opacity="0.3" stroke="#90CAF9" stroke-width="1.2"/>
+          <!-- marks -->
+          <line x1="30" y1="40" x2="36" y2="40" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="60" x2="38" y2="60" stroke="#C2185B" stroke-width="0.8" opacity="0.8"/>
+          <line x1="30" y1="80" x2="36" y2="80" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="100" x2="36" y2="100" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="120" x2="36" y2="120" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <!-- highlight -->
+          <line x1="21" y1="14" x2="21" y2="138" stroke="white" stroke-width="1" opacity="0.45"/>
+          <!-- bulb top -->
+          <ellipse cx="24" cy="8" rx="9" ry="6" fill="#424242" opacity="0.9"/>
+          <ellipse cx="21" cy="6" rx="3" ry="2" fill="white" opacity="0.25"/>
+          <!-- drop -->
+          <ellipse class="drop" id="drop0" cx="24" cy="172" rx="4" ry="5" fill="#006980"/>
+        </svg>
+        <div class="pip-badge" id="badge0">10.0 mL pipetted</div>
+      </div>
+
+      <!-- Flask B -->
+      <div class="flask-unit" id="unit1">
+        <svg class="flask-svg" id="flask1" viewBox="0 0 120 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="bulbClipB"><ellipse cx="60" cy="148" rx="50" ry="50"/></clipPath>
+            <linearGradient id="liqB" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#006980"/>
+              <stop offset="100%" stop-color="#2196A8"/>
+            </linearGradient>
+          </defs>
+          <rect x="11" y="126" width="98" height="72" fill="url(#liqB)" clip-path="url(#bulbClipB)" opacity="0.82"/>
+          <rect x="51" y="76" width="18" height="54" fill="#006980" opacity="0.65"/>
+          <ellipse cx="60" cy="148" rx="50" ry="50" fill="#E8F8FF" fill-opacity="0.20" stroke="#90CAF9" stroke-width="1.8"/>
+          <path d="M 110 148 Q 112 98 69 80 L 51 80 Q 8 98 10 148" fill="none" stroke="#90CAF9" stroke-width="1.8"/>
+          <rect x="51" y="14" width="18" height="68" fill="#E8F8FF" fill-opacity="0.18" stroke="#90CAF9" stroke-width="1.5"/>
+          <line x1="43" y1="106" x2="77" y2="106" stroke="#C2185B" stroke-width="1.5"/>
+          <path d="M 30 125 Q 25 148 35 170" stroke="white" stroke-width="3.5" fill="none" opacity="0.35" stroke-linecap="round"/>
+          <ellipse cx="35" cy="132" rx="9" ry="6" fill="white" opacity="0.20"/>
+          <line x1="55" y1="20" x2="55" y2="78" stroke="white" stroke-width="1.2" opacity="0.35"/>
+          <circle cx="60" cy="10" r="9" fill="#E0E0E0" stroke="#BDBDBD" stroke-width="1"/>
+          <ellipse cx="57" cy="7" rx="4" ry="2.5" fill="white" opacity="0.4"/>
+          <text x="60" y="158" text-anchor="middle" font-family="Arial" font-size="9" fill="white" font-style="italic" opacity="0.80">100 mL</text>
+        </svg>
+        <div class="flask-label">
+          <span class="conc">0.001 M</span>
+          <span class="soln">Solution B</span>
+        </div>
+      </div>
+
+      <!-- Pipette zone 2 -->
+      <div class="pip-zone" id="pip1">
+        <svg class="pip-svg" id="pipSvg1" viewBox="0 0 48 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pipLiq1" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#2196A8" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#4DD0E1" stop-opacity="0.4"/>
+            </linearGradient>
+          </defs>
+          <rect x="18" y="10" width="12" height="130" fill="#E8F8FF" fill-opacity="0.25" stroke="#90CAF9" stroke-width="1.2"/>
+          <rect x="19.5" y="12" width="9" height="100" fill="url(#pipLiq1)"/>
+          <polygon points="18,140 30,140 24,170" fill="#E8F8FF" fill-opacity="0.3" stroke="#90CAF9" stroke-width="1.2"/>
+          <line x1="30" y1="40" x2="36" y2="40" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="60" x2="38" y2="60" stroke="#C2185B" stroke-width="0.8" opacity="0.8"/>
+          <line x1="30" y1="80" x2="36" y2="80" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="100" x2="36" y2="100" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="120" x2="36" y2="120" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="21" y1="14" x2="21" y2="138" stroke="white" stroke-width="1" opacity="0.45"/>
+          <ellipse cx="24" cy="8" rx="9" ry="6" fill="#424242" opacity="0.9"/>
+          <ellipse cx="21" cy="6" rx="3" ry="2" fill="white" opacity="0.25"/>
+        </svg>
+        <div class="pip-badge" id="badge1">10.0 mL pipetted</div>
+      </div>
+
+      <!-- Flask C -->
+      <div class="flask-unit" id="unit2">
+        <svg class="flask-svg" id="flask2" viewBox="0 0 120 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="bulbClipC"><ellipse cx="60" cy="148" rx="50" ry="50"/></clipPath>
+            <linearGradient id="liqC" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#2196A8"/>
+              <stop offset="100%" stop-color="#64B5C0"/>
+            </linearGradient>
+          </defs>
+          <rect x="11" y="134" width="98" height="64" fill="url(#liqC)" clip-path="url(#bulbClipC)" opacity="0.78"/>
+          <rect x="51" y="80" width="18" height="58" fill="#2196A8" opacity="0.58"/>
+          <ellipse cx="60" cy="148" rx="50" ry="50" fill="#E8F8FF" fill-opacity="0.18" stroke="#90CAF9" stroke-width="1.8"/>
+          <path d="M 110 148 Q 112 98 69 80 L 51 80 Q 8 98 10 148" fill="none" stroke="#90CAF9" stroke-width="1.8"/>
+          <rect x="51" y="14" width="18" height="68" fill="#E8F8FF" fill-opacity="0.18" stroke="#90CAF9" stroke-width="1.5"/>
+          <line x1="43" y1="106" x2="77" y2="106" stroke="#C2185B" stroke-width="1.5"/>
+          <path d="M 30 130 Q 25 150 35 172" stroke="white" stroke-width="3.5" fill="none" opacity="0.32" stroke-linecap="round"/>
+          <ellipse cx="35" cy="136" rx="9" ry="6" fill="white" opacity="0.18"/>
+          <line x1="55" y1="20" x2="55" y2="78" stroke="white" stroke-width="1.2" opacity="0.35"/>
+          <circle cx="60" cy="10" r="9" fill="#E0E0E0" stroke="#BDBDBD" stroke-width="1"/>
+          <ellipse cx="57" cy="7" rx="4" ry="2.5" fill="white" opacity="0.4"/>
+          <text x="60" y="162" text-anchor="middle" font-family="Arial" font-size="9" fill="white" font-style="italic" opacity="0.75">100 mL</text>
+        </svg>
+        <div class="flask-label">
+          <span class="conc">1×10⁻⁴ M</span>
+          <span class="soln">Solution C</span>
+        </div>
+      </div>
+
+      <!-- Pipette zone 3 -->
+      <div class="pip-zone" id="pip2">
+        <svg class="pip-svg" id="pipSvg2" viewBox="0 0 48 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pipLiq2" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#64B5C0" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#B2DFE4" stop-opacity="0.4"/>
+            </linearGradient>
+          </defs>
+          <rect x="18" y="10" width="12" height="130" fill="#E8F8FF" fill-opacity="0.25" stroke="#90CAF9" stroke-width="1.2"/>
+          <rect x="19.5" y="12" width="9" height="100" fill="url(#pipLiq2)"/>
+          <polygon points="18,140 30,140 24,170" fill="#E8F8FF" fill-opacity="0.3" stroke="#90CAF9" stroke-width="1.2"/>
+          <line x1="30" y1="40" x2="36" y2="40" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="60" x2="38" y2="60" stroke="#C2185B" stroke-width="0.8" opacity="0.8"/>
+          <line x1="30" y1="80" x2="36" y2="80" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="100" x2="36" y2="100" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="30" y1="120" x2="36" y2="120" stroke="#C2185B" stroke-width="0.8" opacity="0.6"/>
+          <line x1="21" y1="14" x2="21" y2="138" stroke="white" stroke-width="1" opacity="0.45"/>
+          <ellipse cx="24" cy="8" rx="9" ry="6" fill="#424242" opacity="0.9"/>
+          <ellipse cx="21" cy="6" rx="3" ry="2" fill="white" opacity="0.25"/>
+        </svg>
+        <div class="pip-badge" id="badge2">10.0 mL pipetted</div>
+      </div>
+
+      <!-- Flask D -->
+      <div class="flask-unit" id="unit3">
+        <svg class="flask-svg" id="flask3" viewBox="0 0 120 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="bulbClipD"><ellipse cx="60" cy="148" rx="50" ry="50"/></clipPath>
+            <linearGradient id="liqD" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#64B5C0"/>
+              <stop offset="100%" stop-color="#B2DFE4"/>
+            </linearGradient>
+          </defs>
+          <rect x="11" y="142" width="98" height="56" fill="url(#liqD)" clip-path="url(#bulbClipD)" opacity="0.72"/>
+          <rect x="51" y="84" width="18" height="60" fill="#64B5C0" opacity="0.50"/>
+          <ellipse cx="60" cy="148" rx="50" ry="50" fill="#E8F8FF" fill-opacity="0.16" stroke="#90CAF9" stroke-width="1.8"/>
+          <path d="M 110 148 Q 112 98 69 80 L 51 80 Q 8 98 10 148" fill="none" stroke="#90CAF9" stroke-width="1.8"/>
+          <rect x="51" y="14" width="18" height="68" fill="#E8F8FF" fill-opacity="0.18" stroke="#90CAF9" stroke-width="1.5"/>
+          <line x1="43" y1="106" x2="77" y2="106" stroke="#C2185B" stroke-width="1.5"/>
+          <path d="M 30 134 Q 25 154 35 174" stroke="white" stroke-width="3.5" fill="none" opacity="0.28" stroke-linecap="round"/>
+          <ellipse cx="35" cy="140" rx="9" ry="6" fill="white" opacity="0.15"/>
+          <line x1="55" y1="20" x2="55" y2="78" stroke="white" stroke-width="1.2" opacity="0.35"/>
+          <circle cx="60" cy="10" r="9" fill="#E0E0E0" stroke="#BDBDBD" stroke-width="1"/>
+          <ellipse cx="57" cy="7" rx="4" ry="2.5" fill="white" opacity="0.4"/>
+          <text x="60" y="166" text-anchor="middle" font-family="Arial" font-size="9" fill="#1C0A14" font-style="italic" opacity="0.60">100 mL</text>
+        </svg>
+        <div class="flask-label">
+          <span class="conc">1×10⁻⁵ M</span>
+          <span class="soln">Solution D</span>
+          <span class="note">most dilute</span>
+        </div>
+      </div>
+
+    </div><!-- end flasks-row -->
+  </div><!-- end lab-bench -->
+
+  <!-- Concentration meter -->
+  <div class="conc-meter">
+    <h4>✦ Concentration Visualiser</h4>
+    <div class="meter-row lit" id="meter0">
+      <span class="meter-label">Solution A</span>
+      <div class="meter-bar-bg">
+        <div class="meter-bar-fill" id="bar0" style="width:100%; background:linear-gradient(90deg,#004D60,#006980)"></div>
+      </div>
+      <span class="meter-value">0.01 M</span>
+    </div>
+    <div class="meter-row" id="meter1">
+      <span class="meter-label">Solution B</span>
+      <div class="meter-bar-bg">
+        <div class="meter-bar-fill" id="bar1" style="width:0%; background:linear-gradient(90deg,#006980,#2196A8)"></div>
+      </div>
+      <span class="meter-value">0.001 M</span>
+    </div>
+    <div class="meter-row" id="meter2">
+      <span class="meter-label">Solution C</span>
+      <div class="meter-bar-bg">
+        <div class="meter-bar-fill" id="bar2" style="width:0%; background:linear-gradient(90deg,#2196A8,#64B5C0)"></div>
+      </div>
+      <span class="meter-value">1×10⁻⁴ M</span>
+    </div>
+    <div class="meter-row" id="meter3">
+      <span class="meter-label">Solution D</span>
+      <div class="meter-bar-bg">
+        <div class="meter-bar-fill" id="bar3" style="width:0%; background:linear-gradient(90deg,#64B5C0,#B2DFE4)"></div>
+      </div>
+      <span class="meter-value">1×10⁻⁵ M</span>
+    </div>
+  </div>
+
+  <!-- Step info cards -->
+  <div class="step-card visible" id="card0">
+    <h3><div class="step-num-badge">1</div> Prepare the Stock Solution (0.01 M)</h3>
+    <p>
+      Sodium oleate has a molar mass of <span class="highlight">304.4 g mol⁻¹</span>.
+      To make <span class="h-gold">100 mL of 0.01 M</span> solution:
+    </p>
+    <div class="eq">
+      n = C × V = 0.01 mol/L × 0.100 L = 1.0 × 10⁻³ mol<br>
+      m = n × M = 1.0 × 10⁻³ × 304.4 = <strong>0.304 g</strong>
+    </div>
+    <p>
+      Accurately weigh <span class="highlight">0.304 g</span> of sodium oleate, transfer to a
+      <span class="h-gold">100 mL volumetric flask</span>, add ~60 mL distilled water, swirl gently
+      (warm to 30–40 °C if needed), cool to room temperature, then make up to the
+      <span class="highlight">100 mL calibration mark</span> and mix thoroughly.
+    </p>
+  </div>
+
+  <div class="step-card" id="card1">
+    <h3><div class="step-num-badge">2</div> Prepare Solution B — 0.001 M</h3>
+    <p>Using the dilution equation <span class="highlight">C₁V₁ = C₂V₂</span>:</p>
+    <div class="eq">
+      V₁ = (C₂ × V₂) / C₁ = (0.001 × 100) / 0.01 = <strong>10.0 mL</strong>
+    </div>
+    <p>
+      Pipette <span class="highlight">10.0 mL</span> of Solution A into a clean
+      <span class="h-gold">100 mL volumetric flask</span>.
+      Make up to the mark with distilled water and mix. This is a <span class="h-purple">1:10 dilution</span> —
+      concentration decreases by one order of magnitude.
+    </p>
+  </div>
+
+  <div class="step-card" id="card2">
+    <h3><div class="step-num-badge">3</div> Prepare Solution C — 1×10⁻⁴ M</h3>
+    <p>Using the dilution equation <span class="highlight">C₁V₁ = C₂V₂</span>:</p>
+    <div class="eq">
+      V₁ = (1×10⁻⁴ × 100) / 0.001 = <strong>10.0 mL</strong>
+    </div>
+    <p>
+      Pipette <span class="highlight">10.0 mL</span> of Solution B into a clean
+      <span class="h-gold">100 mL volumetric flask</span>.
+      Make up to the mark with distilled water and mix. Each 1:10 dilution step reduces
+      the concentration by <span class="h-purple">one decade</span> on the concentration scale.
+    </p>
+  </div>
+
+  <div class="step-card" id="card3">
+    <h3><div class="step-num-badge">4</div> Prepare Solution D — 1×10⁻⁵ M</h3>
+    <p>Using the dilution equation <span class="highlight">C₁V₁ = C₂V₂</span>:</p>
+    <div class="eq">
+      V₁ = (1×10⁻⁵ × 100) / 1×10⁻⁴ = <strong>10.0 mL</strong>
+    </div>
+    <p>
+      Pipette <span class="highlight">10.0 mL</span> of Solution C into a clean
+      <span class="h-gold">100 mL volumetric flask</span>.
+      Make up to the mark with distilled water and mix. The final series spans
+      <span class="highlight">0.01 M → 1×10⁻⁵ M</span>,
+      covering four decades above and below the CMC of sodium oleate
+      (~1.6–2.1 × 10⁻³ M).
+    </p>
+  </div>
+
+</div><!-- end wrapper -->
+
+<script>
+  // ── SPARKLE FIELD ──────────────────────────────────────────
+  const sparkleColors = ['#C2185B','#E91E8C','#F8BBD9','#CE93D8','#7B1FA2','#C8971A','#64B5C0'];
+  const sf = document.getElementById('sparkles');
+  for (let i = 0; i < 35; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'sp';
+    sp.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${sparkleColors[Math.floor(Math.random()*sparkleColors.length)]};
+      width:${Math.random()*6+3}px;
+      height:${Math.random()*6+3}px;
+      animation-delay:${Math.random()*8}s;
+      animation-duration:${Math.random()*5+6}s;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    sf.appendChild(sp);
+  }
+
+  // ── STATE ──────────────────────────────────────────────────
+  let currentStep = 0;
+  let playInterval = null;
+
+  const barWidths = [100, 66, 44, 28]; // visual widths for meters
+
+  function goStep(step) {
+    // update buttons
+    document.querySelectorAll('.step-btn').forEach((b,i)=>{
+      b.classList.toggle('active', i===step);
+    });
+
+    // update cards
+    document.querySelectorAll('.step-card').forEach((c,i)=>{
+      c.classList.toggle('visible', i===step);
+    });
+
+    // progress bar
+    document.getElementById('progressFill').style.width = ((step+1)/4*100)+'%';
+
+    // flask highlights
+    document.querySelectorAll('.flask-svg').forEach((f,i)=>{
+      f.classList.toggle('active-flask', i<=step);
+    });
+
+    // pulse the newly activated flask
+    const activeFlask = document.getElementById('flask'+step);
+    activeFlask.classList.remove('pulse');
+    void activeFlask.offsetWidth; // reflow
+    activeFlask.classList.add('pulse');
+    setTimeout(()=>activeFlask.classList.remove('pulse'), 700);
+
+    // pipette activation (step 1,2,3 → pip 0,1,2)
+    for (let p=0; p<3; p++) {
+      const pipSvg = document.getElementById('pipSvg'+p);
+      const badge  = document.getElementById('badge'+p);
+      const isActive = (p === step-1);
+      pipSvg.classList.toggle('active-pip', isActive);
+      badge.classList.toggle('active-badge', p < step);
+      pipSvg.style.opacity = p < step ? '0.85' : (isActive ? '1' : '0.22');
+      if (isActive) {
+        pipSvg.classList.remove('active-pip');
+        void pipSvg.offsetWidth;
+        pipSvg.classList.add('active-pip');
+        // trigger drop
+        triggerDrop(p);
+      }
+    }
+
+    // concentration meters
+    for (let m=0; m<4; m++) {
+      const row  = document.getElementById('meter'+m);
+      const bar  = document.getElementById('bar'+m);
+      const isLit = m <= step;
+      row.classList.toggle('lit', isLit);
+      bar.style.width = isLit ? barWidths[m]+'%' : '0%';
+    }
+
+    // hearts on steps 1-3
+    if (step > 0) spawnHearts();
+
+    currentStep = step;
+  }
+
+  function triggerDrop(pipIdx) {
+    const pip = document.getElementById('pipSvg'+pipIdx);
+    const rect = pip.getBoundingClientRect();
+    const drop = document.createElement('div');
+    drop.style.cssText = `
+      position:fixed;
+      left:${rect.left + rect.width/2 - 5}px;
+      top:${rect.bottom - 20}px;
+      width:10px; height:14px;
+      border-radius:50% 50% 60% 60%;
+      background:#006980;
+      opacity:1;
+      z-index:999;
+      animation: dropFall 0.9s ease-in forwards;
+    `;
+    document.body.appendChild(drop);
+    setTimeout(()=>drop.remove(), 1000);
+  }
+
+  function spawnHearts() {
+    const container = document.getElementById('hearts');
+    const emojis = ['♡','✦','✿','♡','✦'];
+    for (let i=0; i<4; i++) {
+      setTimeout(()=>{
+        const h = document.createElement('div');
+        h.className = 'heart-pop';
+        h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        h.style.cssText = `
+          left:${Math.random()*80+10}%;
+          top:${Math.random()*40+30}%;
+          color:${sparkleColors[Math.floor(Math.random()*3)]};
+        `;
+        container.appendChild(h);
+        setTimeout(()=>h.remove(), 1300);
+      }, i*180);
+    }
+  }
+
+  function playAll() {
+    if (playInterval) { clearInterval(playInterval); playInterval=null; document.getElementById('playBtn').textContent='▶ Play All Steps'; return; }
+    document.getElementById('playBtn').textContent='⏹ Stop';
+    goStep(0);
+    let s = 0;
+    playInterval = setInterval(()=>{
+      s++;
+      if (s > 3) { clearInterval(playInterval); playInterval=null; document.getElementById('playBtn').textContent='▶ Play All Steps'; return; }
+      goStep(s);
+    }, 2200);
+  }
+
+  // drop fall keyframe injection
+  const style = document.createElement('style');
+  style.textContent = `@keyframes dropFall { 0%{transform:translateY(0) scale(1);opacity:1} 100%{transform:translateY(60px) scale(0.3);opacity:0} }`;
+  document.head.appendChild(style);
+
+  // init
+  goStep(0);
+</script>
+</body>
+</html>
